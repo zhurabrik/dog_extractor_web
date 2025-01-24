@@ -3,12 +3,12 @@ import { useParams } from "react-router-dom";
 import "./EditorPage.css";
 
 const EditorPage = () => {
-    const { templateId } = useParams(); // Получаем ID шаблона из URL
-    const [canvasData, setCanvasData] = useState(null); // Данные холста
-    const [canvasStyle, setCanvasStyle] = useState({}); // Стили холста для масштабирования
+    const { templateId } = useParams();
+    const [canvasData, setCanvasData] = useState(null); // Данные макета
+    const [canvasStyle, setCanvasStyle] = useState({}); // Стили холста
 
     useEffect(() => {
-        // Загрузка данных макета при открытии страницы
+        // Загрузка данных макета
         const loadTemplate = () => {
             if (templateId === "1") {
                 setCanvasData({
@@ -16,10 +16,10 @@ const EditorPage = () => {
                     width: 1080,
                     height: 1920,
                     elements: [
-                        { type: "image", width: "33%", height: "auto", x: "33%", y: "40%" },
-                        { type: "image", width: "33%", height: "auto", x: "66%", y: "40%" },
-                        { type: "text", content: "Текст под первой картинкой", x: "33%", y: "70%" },
-                        { type: "text", content: "Текст под второй картинкой", x: "66%", y: "70%" },
+                        { type: "image", width: "30%", height: "auto", x: "15%", y: "30%" }, // Картинка 1
+                        { type: "image", width: "30%", height: "auto", x: "55%", y: "30%" }, // Картинка 2
+                        { type: "text", content: "Текст под первой картинкой", x: "15%", y: "65%" }, // Текст 1
+                        { type: "text", content: "Текст под второй картинкой", x: "55%", y: "65%" }, // Текст 2
                     ],
                 });
             } else if (templateId === "2") {
@@ -41,17 +41,15 @@ const EditorPage = () => {
     }, [templateId]);
 
     useEffect(() => {
-        // Рассчитываем масштаб холста в зависимости от размера экрана
+        // Рассчитываем масштабирование
         if (canvasData) {
             const screenWidth = window.innerWidth * 0.9; // 90% ширины экрана
-            const screenHeight = window.innerHeight * 0.8; // 80% высоты экрана
-            const scale = Math.min(screenWidth / canvasData.width, screenHeight / canvasData.height);
+            const screenHeight = window.innerHeight * 0.9; // 90% высоты экрана
+            const scale = Math.min(screenWidth / canvasData.width, screenHeight / canvasData.height); // Масштабирование с учетом пропорций
 
             setCanvasStyle({
-                width: canvasData.width * scale,
-                height: canvasData.height * scale,
-                transform: `scale(${scale})`,
-                transformOrigin: "top left",
+                width: canvasData.width * scale, // Масштабируем ширину
+                height: canvasData.height * scale, // Масштабируем высоту
             });
         }
     }, [canvasData]);
@@ -60,7 +58,7 @@ const EditorPage = () => {
 
     return (
         <div className="editor-page">
-            <div className="canvas-container">
+            <div className="canvas-wrapper">
                 <div
                     className="canvas"
                     style={{
@@ -70,16 +68,20 @@ const EditorPage = () => {
                     }}
                 >
                     {canvasData.elements.map((el, index) => {
+                        // Преобразуем проценты в абсолютные координаты
+                        const absoluteX = (parseFloat(el.x) / 100) * canvasStyle.width;
+                        const absoluteY = (parseFloat(el.y) / 100) * canvasStyle.height;
+
                         if (el.type === "image") {
                             return (
                                 <div
                                     key={index}
                                     style={{
                                         position: "absolute",
-                                        width: el.width,
-                                        height: el.height,
-                                        top: el.y,
-                                        left: el.x,
+                                        width: el.width, // Ширина элемента
+                                        height: el.height, // Высота элемента
+                                        top: absoluteY, // Абсолютная координата Y
+                                        left: absoluteX, // Абсолютная координата X
                                         border: "1px solid black",
                                         backgroundColor: "#ddd",
                                     }}
@@ -93,8 +95,8 @@ const EditorPage = () => {
                                     key={index}
                                     style={{
                                         position: "absolute",
-                                        top: el.y,
-                                        left: el.x,
+                                        top: absoluteY, // Абсолютная координата Y
+                                        left: absoluteX, // Абсолютная координата X
                                         fontSize: "16px",
                                         color: "#000",
                                     }}
@@ -103,8 +105,10 @@ const EditorPage = () => {
                                 </div>
                             );
                         }
+
                         return null;
                     })}
+
                 </div>
             </div>
         </div>
