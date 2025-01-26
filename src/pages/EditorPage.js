@@ -8,7 +8,7 @@ const EditorPage = () => {
   const [canvasData, setCanvasData] = useState(null); // Данные макета
   const [canvasStyle, setCanvasStyle] = useState({}); // Стили холста
 
-  // Загружаем данные макета
+  // Загрузка данных макета
   useEffect(() => {
     const loadTemplate = () => {
       if (templateId === "1") {
@@ -16,7 +16,6 @@ const EditorPage = () => {
           orientation: "vertical",
           width: 1080,
           height: 1920,
-          background: "#f0f0f0", // Базовый цвет фона
           elements: [
             { type: "image", width: "30%", height: "auto", x: "15%", y: "30%" },
             { type: "image", width: "30%", height: "auto", x: "55%", y: "30%" },
@@ -29,7 +28,6 @@ const EditorPage = () => {
           orientation: "horizontal",
           width: 1920,
           height: 1080,
-          background: "#f0f0f0",
           elements: [
             { type: "image", width: "30%", height: "auto", x: "20%", y: "40%" },
             { type: "image", width: "30%", height: "auto", x: "60%", y: "40%" },
@@ -53,14 +51,12 @@ const EditorPage = () => {
       setCanvasStyle({
         width: canvasData.width * scale,
         height: canvasData.height * scale,
-        background: canvasData.background,
-        backgroundSize: "cover", // Покрываем весь холст
-        backgroundPosition: "center", // Центрируем фон
+        position: "relative",
+        overflow: "hidden", // Обрезка элементов за пределами холста
       });
     }
   }, [canvasData]);
 
-  // Замена фона холста
   const handleReplaceBackground = () => {
     const input = document.createElement("input");
     input.type = "file";
@@ -72,7 +68,9 @@ const EditorPage = () => {
         reader.onload = (e) => {
           setCanvasData((prev) => ({
             ...prev,
-            background: `url(${e.target.result})`, // Устанавливаем фон как background-image
+            backgroundElement: {
+              src: e.target.result, // Сохраняем Base64 изображение
+            },
           }));
         };
         reader.readAsDataURL(file);
@@ -81,46 +79,35 @@ const EditorPage = () => {
     input.click();
   };
 
-  const handleSaveProject = () => {
-    const projectName = prompt("Введите название проекта:");
-    if (projectName) {
-      alert(`Проект "${projectName}" сохранен! (пока только имитация)`);
-    }
-  };
-
-  const handleExportProject = () => {
-    alert("Функция экспорта еще в разработке.");
-  };
-
-  const handleUndo = () => {
-    alert("Отмена действия (в разработке).");
-  };
-
-  const handleRedo = () => {
-    alert("Повтор действия (в разработке).");
-  };
-
   if (!canvasData) return <p>Загрузка шаблона...</p>;
 
   return (
     <div className="editor-page">
-      {/* Панель инструментов */}
       <Toolbar
         onReplaceBackground={handleReplaceBackground}
-        onSaveProject={handleSaveProject}
-        onExportProject={handleExportProject}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
+        onSaveProject={() => alert("Сохранение еще в разработке")}
+        onExportProject={() => alert("Экспорт еще в разработке")}
+        onUndo={() => alert("Отмена еще в разработке")}
+        onRedo={() => alert("Повтор еще в разработке")}
       />
-      {/* Холст */}
+
       <div className="canvas-wrapper">
-        <div
-          className="canvas"
-          style={{
-            ...canvasStyle,
-            position: "relative",
-          }}
-        >
+        <div className="canvas" style={{ ...canvasStyle }}>
+          {canvasData.backgroundElement && (
+            <img
+              src={canvasData.backgroundElement.src}
+              alt="Background"
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "cover",
+              }}
+            />
+          )}
+
           {canvasData.elements.map((el, index) => {
             const absoluteX = (parseFloat(el.x) / 100) * canvasStyle.width;
             const absoluteY = (parseFloat(el.y) / 100) * canvasStyle.height;
