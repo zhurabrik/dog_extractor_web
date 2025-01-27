@@ -12,35 +12,30 @@
   padding: 20px;
   background-color: #333;
   color: white;
-  width: 200px; /* Панель всегда занимает фиксированную ширину */
-  height: 100%; /* Панель растягивается на всю высоту */
-}
-
-.toolbar button {
-  padding: 10px;
-  background-color: #007bff;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.toolbar button:hover {
-  background-color: #0056b3;
+  width: 200px;
+  height: 100%;
 }
 
 .canvas-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1; /* Занимает всё оставшееся место */
+  flex-grow: 1;
   overflow: hidden;
 }
 
 .canvas {
   position: relative;
   border: 1px solid #ccc;
-  background-size: cover; /* Масштабирует фон без искажения */
-  background-position: center; /* Центрирует фон */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  background: white;
 }
+
+.canvas div {
+  user-select: none; /* Отключаем выделение текста */
+  cursor: grab; /* Курсор для перетаскивания */
+}
+
+.canvas div:active {
+  cursor: grabbing; /* Меняем курсор во время перетаскивания */
+}
+

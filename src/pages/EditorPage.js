@@ -1,14 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import Toolbar from "../components/Toolbar"; // Панель инструментов
+import Toolbar from "../components/Toolbar";
 import "./EditorPage.css";
 
 const EditorPage = () => {
-  const { templateId } = useParams(); // Получаем ID шаблона из URL
-  const [canvasData, setCanvasData] = useState(null); // Данные макета
-  const [canvasStyle, setCanvasStyle] = useState({}); // Стили холста
+  const { templateId } = useParams();
+  const [canvasData, setCanvasData] = useState(null);
+  const [canvasStyle, setCanvasStyle] = useState({});
+  const [draggingElement, setDraggingElement] = useState(null);
+  const [offset, setOffset] = useState({ x: 0, y: 0 });
 
-  // Загрузка данных макета
   useEffect(() => {
     const loadTemplate = () => {
       if (templateId === "1") {
@@ -41,112 +42,103 @@ const EditorPage = () => {
     loadTemplate();
   }, [templateId]);
 
-  // Масштабирование холста
   useEffect(() => {
     if (canvasData) {
-      const screenWidth = window.innerWidth - 200; // Учитываем ширину панели инструментов
+      const toolbarWidth = 200;
+      const screenWidth = window.innerWidth - toolbarWidth;
       const screenHeight = window.innerHeight;
+
       const scale = Math.min(screenWidth / canvasData.width, screenHeight / canvasData.height);
 
       setCanvasStyle({
         width: canvasData.width * scale,
         height: canvasData.height * scale,
         position: "relative",
-        overflow: "hidden", // Обрезка элементов за пределами холста
+        overflow: "hidden",
       });
     }
   }, [canvasData]);
 
-  const handleReplaceBackground = () => {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*";
-    input.onchange = (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          setCanvasData((prev) => ({
-            ...prev,
-            backgroundElement: {
-              src: e.target.result, // Сохраняем Base64 изображение
-            },
-          }));
+  const handleMouseDown = (event, elementIndex) => {
+    setDraggingElement(elementIndex);
+    const bounds = event.target.getBoundingClientRect();
+    setOffset({
+      x: event.clientX - bounds.left,
+      y: event.clientY - bounds.top,
+    });
+  };
+
+  const handleMouseMove = (event) => {
+    if (draggingElement !== null) {
+      const canvasBounds = document.querySelector(".canvas").getBoundingClientRect();
+
+      const newX = ((event.clientX - canvasBounds.left - offset.x) / canvasStyle.width) * 100;
+      const newY = ((event.clientY - canvasBounds.top - offset.y) / canvasStyle.height) * 100;
+
+      setCanvasData((prev) => {
+        const updatedElements = [...prev.elements];
+        const element = updatedElements[draggingElement];
+
+        const elementWidth = parseFloat(element.width) || 0;
+        const elementHeight = parseFloat(element.height) || 0;
+
+        const limitedX = Math.min(Math.max(newX, 0), 100 - elementWidth);
+        const limitedY = Math.min(Math.max(newY, 0), 100 - elementHeight);
+
+        updatedElements[draggingElement] = {
+          ...element,
+          x: `${limitedX}%`,
+          y: `${limitedY}%`,
         };
-        reader.readAsDataURL(file);
-      }
-    };
-    input.click();
+
+        return { ...prev, elements: updatedElements };
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setDraggingElement(null);
   };
 
   if (!canvasData) return <p>Загрузка шаблона...</p>;
 
   return (
-    <div className="editor-page">
+    <div
+      className="editor-page"
+      onMouseMove={handleMouseMove}
+      onMouseUp={handleMouseUp}
+    >
       <Toolbar
-        onReplaceBackground={handleReplaceBackground}
-        onSaveProject={() => alert("Сохранение еще в разработке")}
-        onExportProject={() => alert("Экспорт еще в разработке")}
-        onUndo={() => alert("Отмена еще в разработке")}
-        onRedo={() => alert("Повтор еще в разработке")}
+        onReplaceBackground={() => alert("Заменить фон")}
+        onSaveProject={() => alert("Сохранить проект")}
+        onExportProject={() => alert("Экспортировать проект")}
+        onUndo={() => alert("Отмена")}
+        onRedo={() => alert("Повтор")}
       />
-
       <div className="canvas-wrapper">
         <div className="canvas" style={{ ...canvasStyle }}>
-          {canvasData.backgroundElement && (
-            <img
-              src={canvasData.backgroundElement.src}
-              alt="Background"
-              style={{
-                position: "absolute",
-                top: 0,
-                left: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "cover",
-              }}
-            />
-          )}
-
           {canvasData.elements.map((el, index) => {
             const absoluteX = (parseFloat(el.x) / 100) * canvasStyle.width;
             const absoluteY = (parseFloat(el.y) / 100) * canvasStyle.height;
 
-            if (el.type === "image") {
-              return (
-                <div
-                  key={index}
-                  style={{
-                    position: "absolute",
-                    width: el.width,
-                    height: el.height,
-                    top: absoluteY,
-                    left: absoluteX,
-                    border: "1px solid black",
-                    backgroundColor: "#ddd",
-                  }}
-                >
-                  Картинка
-                </div>
-              );
-            } else if (el.type === "text") {
-              return (
-                <div
-                  key={index}
-                  style={{
-                    position: "absolute",
-                    top: absoluteY,
-                    left: absoluteX,
-                    fontSize: "16px",
-                    color: "#000",
-                  }}
-                >
-                  {el.content}
-                </div>
-              );
-            }
-
-            return null;
+            return (
+              <div
+                key={index}
+                style={{
+                  position: "absolute",
+                  width: el.type === "text" ? "200px" : el.width,
+                  height: el.height,
+                  top: absoluteY,
+                  left: absoluteX,
+                  border: "1px solid black",
+                  backgroundColor: el.type === "image" ? "#ddd" : "transparent",
+                  cursor: "grab",
+                }}
+                onMouseDown={(e) => handleMouseDown(e, index)}
+              >
+                {el.type === "text" ? el.content : "Картинка"}
+              </div>
+            );
           })}
         </div>
       </div>
