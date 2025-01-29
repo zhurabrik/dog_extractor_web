@@ -1,41 +1,90 @@
+/* Главный контейнер редактора */
 .editor-page {
   display: flex;
-  height: 100vh;
-  background-color: #f8f9fa;
-  overflow: hidden;
+  height: 100vh; /* Высота страницы на весь экран */
+  background-color: #f8f9fa; /* Светлый фон */
+  overflow: hidden; /* Убираем прокрутку */
 }
 
+/* Панель инструментов */
 .toolbar {
   display: flex;
   flex-direction: column;
   gap: 10px;
   padding: 20px;
-  background-color: #333;
-  color: white;
-  width: 200px;
-  height: 100%;
+  background-color: #333; /* Тёмный фон панели */
+  color: white; /* Белый текст */
+  width: 200px; /* Фиксированная ширина панели */
+  height: 100%; /* Растягиваем по высоте */
 }
 
+/* Кнопки на панели инструментов */
+.toolbar button {
+  padding: 10px;
+  background-color: #007bff; /* Синий цвет кнопок */
+  color: white; /* Белый текст кнопок */
+  border: none; /* Убираем обводку */
+  border-radius: 5px; /* Закругляем углы */
+  cursor: pointer; /* Курсор для кнопок */
+}
+
+.toolbar button:hover {
+  background-color: #0056b3; /* Тёмно-синий при наведении */
+}
+
+/* Обёртка холста */
 .canvas-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
-  flex-grow: 1;
-  overflow: hidden;
+  flex-grow: 1; /* Занимает оставшееся пространство */
+  overflow: hidden; /* Убираем скроллинг */
 }
 
+/* Холст */
 .canvas {
   position: relative;
-  border: 1px solid #ccc;
-  background: white;
+  border: 1px solid #ccc; /* Граница холста */
+  background: white; /* Белый фон холста */
 }
 
+/* Элементы на холсте (используем react-rnd) */
+.canvas .react-rnd {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent; /* Рамка по умолчанию прозрачная */
+  overflow: hidden;
+  position: absolute;
+  cursor: grab; /* Указываем, что элемент можно перетаскивать */
+  transition: border-color 0.2s;
+}
+
+.canvas .react-rnd:focus-within {
+  border: 1px solid blue; /* Синяя рамка при выделении элемента */
+}
+
+.canvas .react-rnd .handle {
+  width: 8px;
+  height: 8px;
+  background-color: blue; /* Синие ручки для масштабирования */
+  position: absolute;
+  z-index: 10;
+}
+
+/* Ручки масштабирования */
+.canvas .react-rnd .react-resizable-handle {
+  background-color: blue; /* Цвет ручек */
+  border-radius: 50%; /* Круглая форма */
+}
+
+/* Отключение выделения текста внутри элементов */
 .canvas div {
   user-select: none; /* Отключаем выделение текста */
   cursor: grab; /* Курсор для перетаскивания */
+  transition: transform 0.1s; /* Плавное движение элементов */
 }
 
 .canvas div:active {
-  cursor: grabbing; /* Меняем курсор во время перетаскивания */
+  cursor: grabbing; /* Курсор во время перетаскивания */
 }
-
