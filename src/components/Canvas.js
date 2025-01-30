@@ -2,11 +2,10 @@ import React, { useState } from "react";
 import Element from "./Element";
 
 const Canvas = ({ canvasStyle, canvasData, onUpdateElement }) => {
-  const [selectedElement, setSelectedElement] = useState(null); // Выделенный элемент
+  const [selectedElement, setSelectedElement] = useState(null);
 
   return (
     <div className="canvas" style={canvasStyle}>
-      {/* Фон холста */}
       {canvasData.backgroundElement && (
         <img
           src={canvasData.backgroundElement.src}
@@ -22,7 +21,6 @@ const Canvas = ({ canvasStyle, canvasData, onUpdateElement }) => {
         />
       )}
 
-      {/* Элементы холста */}
       {canvasData.elements.map((el, index) => (
         <Element
           key={index}
@@ -31,6 +29,7 @@ const Canvas = ({ canvasStyle, canvasData, onUpdateElement }) => {
           onUpdate={onUpdateElement}
           selectedElement={selectedElement}
           setSelectedElement={setSelectedElement}
+          canvasStyle={canvasStyle} // Передаём размеры холста
         />
       ))}
     </div>

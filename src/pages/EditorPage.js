@@ -11,15 +11,12 @@ const EditorPage = () => {
 
   useEffect(() => {
     const loadTemplate = () => {
-      const canvasWidth = templateId === "1" ? 1080 : 1920;
-      const canvasHeight = templateId === "1" ? 1920 : 1080;
-
       setCanvasData({
         orientation: templateId === "1" ? "vertical" : "horizontal",
-        width: canvasWidth,
-        height: canvasHeight,
+        width: templateId === "1" ? 1080 : 1920,
+        height: templateId === "1" ? 1920 : 1080,
         elements: [
-          { type: "image", width: "150px", height: "150px", x: 100, y: 100 },
+          { type: "image", width: "150px", height: "150px", x: 100, y: 100 }, // <-- Можешь поменять эти координаты
           { type: "image", width: "150px", height: "150px", x: 400, y: 100 },
           { type: "text", content: "Текст 1", width: "200px", height: "50px", x: 100, y: 300 },
           { type: "text", content: "Текст 2", width: "200px", height: "50px", x: 400, y: 300 },
